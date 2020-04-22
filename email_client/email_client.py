@@ -74,7 +74,7 @@ class mailer(object):
                 pass
         
         
-    def search_for_messages(self, text="Spidar Data - ", area='SUBJECT', folder='', echo=True):
+    def search_for_messages(self, text="", area='', folder='', echo=True):
         """ find messages that match text
         
         Parameters
