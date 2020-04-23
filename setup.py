@@ -4,8 +4,8 @@ with open("README.md", "r") as fh:
       long_description = fh.read()
 
 setup(
-      name='email_client',
-     version='0.1.2',
+      name='data_email_client',
+      version='0.1.2',
       description='email imap client for downloading email data files',
       long_description=long_description,
       long_description_content_type='text/markdown',
