@@ -13,11 +13,6 @@ setup(
       author='NRG Systems, Inc.',
       author_email='support@nrgsystems.com',
       keywords='nrg systems rld symphonie symphoniepro wind data spidar remote sensor lidar email imap',
-      packages=[
-            'nrgpy'
-      ],
-      install_requires={
-      ],
       python_requires>='3.5',
       zip_safe=False,
       classifiers=[
