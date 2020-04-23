@@ -108,7 +108,7 @@ class mailer(object):
         search_term = f'({area} "{text}")'
         
         if folder:
-            folder = [folder]
+            if isinstance(folder, str): folder = [folder]
         else:
             self.list_mailboxes()
             folder = self.mailboxes
