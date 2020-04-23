@@ -6,3 +6,18 @@
 ## Examples
 
 see script docstrings for usage.
+
+``` python
+
+>>> from data_email_client import mailer
+>>> import getpass
+>>> server = 'outlook.office365.com'
+>>> username = 'data-email@my-domain.com'
+>>> password = getpass.getpass()
+...
+>>> imap = mailer(server=server, username=username, password=password)
+>>> imap.list_mailboxes()
+>>> data_boxes = [m for m in imap.mailboxes if 'data' in m]
+>>> imap.search_for_messages(text='1931AG0088', area='BODY', folder=data_boxes)
+>>> imap.download_attachments(out_dir='/path/to/data/', delete=True)
+```
