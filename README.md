@@ -24,7 +24,7 @@ __see script docstrings for more usage info.__
 >>> imap.list_mailboxes()
 >>> data_boxes = [m for m in imap.mailboxes if 'data' in m]
 >>> imap.search_for_messages(text='spidardatanotification@nrgsystems.com', area='FROM', folder=data_boxes)
->>> imap.download_attachments(out_dir='/path/to/data/', delete=True)
+>>> imap.download_attachments(out_dir='/path/to/data/', delete=False)
 ```
 
 ### symphonie data emails
@@ -36,5 +36,5 @@ __see script docstrings for more usage info.__
 >>> imap.list_mailboxes()
 >>> data_boxes = [m for m in imap.mailboxes if 'data' in m]
 >>> imap.search_for_messages(text=body_text, area='BODY', folder=data_boxes)
->>> imap.download_attachments(out_dir='/path/to/data/', delete=True)
+>>> imap.download_attachments(out_dir='/path/to/data/', delete=False)
 ```
