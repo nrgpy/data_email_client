@@ -8,7 +8,9 @@
 
 ## examples
 
-see script docstrings for usage.
+__see script docstrings for more usage info.__
+
+spidar data files:
 
 ``` python
 
@@ -21,6 +23,18 @@ see script docstrings for usage.
 >>> imap = mailer(server=server, username=username, password=password)
 >>> imap.list_mailboxes()
 >>> data_boxes = [m for m in imap.mailboxes if 'data' in m]
->>> imap.search_for_messages(text='1931AG0088', area='BODY', folder=data_boxes)
+>>> imap.search_for_messages(text='spidardatanotification@nrgsystems.com', area='FROM', folder=data_boxes)
+>>> imap.download_attachments(out_dir='/path/to/data/', delete=True)
+```
+
+symphonie data emails
+
+``` python
+...
+>>> body_text = 'SymphoniePRO Logger data attached.' # 'Wind Data attached.' for older logger types
+>>> imap = mailer(server=server, username=username, password=password)
+>>> imap.list_mailboxes()
+>>> data_boxes = [m for m in imap.mailboxes if 'data' in m]
+>>> imap.search_for_messages(text=body_text, area='BODY', folder=data_boxes)
 >>> imap.download_attachments(out_dir='/path/to/data/', delete=True)
 ```
