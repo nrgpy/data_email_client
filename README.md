@@ -2,8 +2,11 @@
 
 **data_email_client** is a Python script for downloading data files from emails.
 
+## installation
 
-## Examples
+```pip install data_email_client```
+
+## examples
 
 see script docstrings for usage.
 
