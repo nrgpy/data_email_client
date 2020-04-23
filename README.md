@@ -10,7 +10,7 @@
 
 __see script docstrings for more usage info.__
 
-spidar data files:
+### spidar data files:
 
 ``` python
 
@@ -27,7 +27,7 @@ spidar data files:
 >>> imap.download_attachments(out_dir='/path/to/data/', delete=True)
 ```
 
-symphonie data emails
+### symphonie data emails
 
 ``` python
 ...
