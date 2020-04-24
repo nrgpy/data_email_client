@@ -103,6 +103,7 @@ class mailer(object):
         >>> imap.search_for_messages(text='data', area='SUBJECT', folder=imap.mailboxes[0])
         """
         
+        self.echo = echo
         self.results = []
         
         search_term = f'({area} "{text}")'
@@ -130,11 +131,16 @@ class mailer(object):
             sys.stdout.flush()
             
             
-    def download_attachments(self, out_dir='', delete=False, archive_folder=''):
+    def download_attachments(self, extension='', out_dir='', delete=False, archive_folder=''):
         """ download email attachments to folder and optionally archive/delete emails
+
+        requires that the search_for_messages function be called first, and uses the self.results message list as a queue.
         
         Parameters
         ----------
+        extension : str
+            (optional) if used, only attachments ending with it will be downloaded; other messages will be passed over.
+            if not, all attachments in the self.results list will be saved.
         out_dir : str
             path to store downloaded attachments at
         delete : bool
@@ -147,6 +153,9 @@ class mailer(object):
         >>> imap.download_attachments(out_dir='data_files/', delete=True, archive_folder=imap.mailboxes[13])
         
         """
+        
+        cnt = 0
+
         if out_dir: self.affirm_directory(out_dir)
         
         for i, result in enumerate(self.results):
@@ -171,18 +180,35 @@ class mailer(object):
                         continue
 
                     filename = part.get_filename()
-                    
-                    if filename is not None:
+
+                    if self.echo: sys.stdout.write('\r')
+                    if self.echo: sys.stdout.write(f'attachment ... {filename}                               ')
+
+                    if (filename is not None) and (filename.lower().endswith(extension)):
+                        cnt += 1
+                        process = True
+
+                        if self.echo: sys.stdout.write('\r')
+                        if self.echo: sys.stdout.write(f'{cnt} ... downloading ... {filename}                               ')
+
                         save_path = os.path.join(out_dir, filename)
-                        
+                                            
                         if not os.path.isfile(save_path):
                             fp = open(save_path, 'wb')
                             fp.write(part.get_payload(decode=True))
                             fp.close()
-                            
-                if archive_folder: self.imap4.copy(emailid, archive_folder)
+
+                        if self.echo: sys.stdout.write('\r')
+                        if self.echo: sys.stdout.write(f'{cnt} ... downloading ... {filename}                     [OK]      ')
+
+                    else:
+                        process = False
+
+                if process:
                     
-                if delete: self.imap4.store(emailid, 'FLAGS', '\\Deleted')
+                    if archive_folder: self.imap4.copy(emailid, archive_folder)
+                    
+                    if delete: self.imap4.store(emailid, 'FLAGS', '\\Deleted')
             
         self.imap4.expunge()
             

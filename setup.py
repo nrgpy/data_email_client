@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setup(
       name='data_email_client',
-      version='0.1.4',
+      version='0.1.5',
       description='email imap client for downloading email data files',
       long_description=long_description,
       long_description_content_type='text/markdown',
@@ -13,7 +13,7 @@ setup(
       packages=['data_email_client'],
       author='NRG Systems, Inc.',
       author_email='support@nrgsystems.com',
-      keywords='nrg systems rld symphonie symphoniepro wind data spidar remote sensor lidar email imap',
+      keywords='nrg systems rld symphonie symphoniepro wind data spidar remote sensor lidar email imap attachment download',
       python_requires='>=3.5',
       zip_safe=False,
       classifiers=[
