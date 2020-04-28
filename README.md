@@ -21,10 +21,9 @@ _see script docstrings for more usage info._
 >>> password = getpass()
 ...
 >>> imap = mailer(server=server, username=username, password=password)
->>> imap.list_mailboxes()
 >>> data_boxes = [m for m in imap.mailboxes if 'data' in m]
->>> imap.search_for_messages(text='spidardatanotification@nrgsystems.com', area='FROM', folder=data_boxes)
->>> imap.download_attachments(out_dir='/path/to/data/', delete=False)
+>>> imap.search_for_messages(text='spidardatanotification@nrgsystems.com', area='from', folder=data_boxes)
+>>> imap.download_attachments(out_dir='/path/to/data/', extension='csv', delete=False)
 ```
 
 ### symphonie data emails
@@ -33,8 +32,12 @@ _see script docstrings for more usage info._
 ...
 >>> body_text = 'SymphoniePRO Logger data attached.' # 'Wind Data attached.' for older logger types
 >>> imap = mailer(server=server, username=username, password=password)
->>> imap.list_mailboxes()
 >>> data_boxes = [m for m in imap.mailboxes if 'data' in m]
->>> imap.search_for_messages(text=body_text, area='BODY', folder=data_boxes)
->>> imap.download_attachments(out_dir='/path/to/data/', delete=False, archive_folder='INBOX/Archive')
+>>> imap.search_for_messages(text=body_text, area='body', folder=data_boxes)
+>>> imap.download_attachments(
+        out_dir='/path/to/data/', 
+        extension='rld', 
+        delete=False, 
+        archive_folder='INBOX/Archive'
+    )
 ```

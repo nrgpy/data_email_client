@@ -47,6 +47,7 @@ class mailer(object):
                 self.password = getpass.getpass()
                 
         self.connect()
+        self.list_mailboxes()
         
                 
     def connect(self):
@@ -131,7 +132,7 @@ class mailer(object):
             sys.stdout.flush()
             
             
-    def download_attachments(self, extension='', out_dir='', delete=False, archive_folder=''):
+    def download_attachments(self, extension=('rld','rwd'), out_dir='', delete=False, archive_folder=''):
         """ download email attachments to folder and optionally archive/delete emails
 
         requires that the search_for_messages function be called first, and uses the self.results message list as a queue.
@@ -139,8 +140,8 @@ class mailer(object):
         Parameters
         ----------
         extension : str
-            (optional) if used, only attachments ending with it will be downloaded; other messages will be passed over.
-            if not, all attachments in the self.results list will be saved.
+            ('rld','rwd') filter for attachments; other messages will be passed over.
+            if set to '', all attachments in the self.results list will be saved.
         out_dir : str
             path to store downloaded attachments at
         delete : bool
@@ -182,7 +183,7 @@ class mailer(object):
                     filename = part.get_filename()
 
                     if self.echo: sys.stdout.write('\r')
-                    if self.echo: sys.stdout.write(f'attachment ... {filename}                               ')
+                    if self.echo: sys.stdout.write(f'{cnt} ... checking attachment ... {filename}                               ')
 
                     if (filename is not None) and (filename.lower().endswith(extension)):
                         cnt += 1
@@ -209,7 +210,10 @@ class mailer(object):
                     if archive_folder: self.imap4.copy(emailid, archive_folder)
                     
                     if delete: self.imap4.store(emailid, 'FLAGS', '\\Deleted')
-            
+        
+        if self.echo: sys.stdout.write('\r')
+        if self.echo: sys.stdout.write(f'downloaded {cnt} attachments to {out_dir}                                ')
+        
         self.imap4.expunge()
             
             
