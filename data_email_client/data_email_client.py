@@ -31,12 +31,13 @@ class mailer(object):
 
     """
     
-    def __init__(self, server='', username='', password=''):
+    def __init__(self, server='', username='', password='', gui=False):
         self.server = server
         self.username = username
         self.password = password
+        self.gui = gui
     
-        if self.username == '' and self.password == '':
+        if self.username == '' and self.password == '' and not self.gui:
 
             try:
                 from danger import username, password
@@ -45,9 +46,9 @@ class mailer(object):
             except:
                 self.username = getpass.getuser()
                 self.password = getpass.getpass()
-                
-        self.connect()
-        self.list_mailboxes()
+                    
+            self.connect()
+            self.list_mailboxes()
         
                 
     def connect(self):
@@ -223,5 +224,3 @@ class mailer(object):
             os.mkdir(directory)
         except:
             pass
-                            
-                            
