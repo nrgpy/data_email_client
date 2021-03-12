@@ -1,44 +1,77 @@
 from data_email_client import mailer
+import getpass
+import logging
 import os
 import pickle
+import socket
+import sys
 
-from tkinter import *
-from tkinter import ttk
-from tkinter.filedialog import askopenfilename, asksaveasfilename
 
+username = getpass.getuser()
+hostname = socket.gethostname()
+
+if sys.platform == 'win32':
+    log_file = f"C:/Users/{username}/nrgpy_email_client.log"
+
+else:
+    log_file = f'/home/{username}/nrgpy_email_client.log'
+
+logger = logging.getLogger(__name__)
+
+logger.setLevel(logging.DEBUG)
+
+file_handler = logging.FileHandler(log_file)
+formatter = logging.Formatter('%(asctime)s | %(levelname)s | [%(module)s:%(lineno)d] | %(message)s')
+file_handler.setFormatter(formatter)
+
+logger.addHandler(file_handler)
+
+
+try:
+    from tkinter import *
+    from tkinter import ttk
+    from tkinter.filedialog import askopenfilename, asksaveasfilename
+
+except ModuleNotFoundError as e:
+    print(e)
+    print("tkinter not installed.\n\ncheck here: https://duckduckgo.com/?t=canonical&q=install+tkinter&ia=web\n")
+    logger.error("tkinter not installed.\n\ncheck here: https://duckduckgo.com/?t=canonical&q=install+tkinter&ia=web\n")
+
+    raise ModuleNotFoundError
 
 title = "nrgpy | Data Email Client"
 config_file = ".data_mail_client.conf"
 
 
 class imap_auto():
-    
+
+    class IORedirector(object):
+        '''A general class for redirecting I/O to this Text widget.'''
+        def __init__(self,text_area):
+            self.text_area = text_area
+
+    class StdoutRedirector(IORedirector):
+        '''A class for redirecting stdout to this Text widget.'''
+        def write(self,string):
+            self.text_area.set(string[:75])
+
+        def flush(self):
+            pass
+
     def __init__(self, first=True, *args, **kwargs):
-        
-#         Tk.__init__(self, *args, **kwargs)
+
         self.root = Tk()
         self.root.title(title)
-#         root.withdraw()
-        
-#         self.mainframe = ttk.Frame(root, padding="20 20 20 20")
-#         self.mainframe.grid(column=0, row=0, sticky=(N, W, E, S))
-#         self.title = title
+        self.root.wm_title(title)
         
         self.root.columnconfigure(0, minsize=100, pad=10, weight=1)
         self.root.columnconfigure(1, minsize=100, pad=10, weight=1)
         self.root.rowconfigure(0, weight=1)
         
-        try:
-            if first:
-                self.imap = False
-                self.first = False
-        except:
-            pass
-        
-        myImage = PhotoImage(file='data_email_client/nrg.png')
+        # myImage = PhotoImage(file='data_email_client/nrg.png')
             
         self.server = StringVar()
-        self.server_entry = ttk.Entry(self.root, width=35, textvariable=self.server)
+        self.server_entry = ttk.Entry(self.root, width=45, textvariable=self.server)
         self.server_entry.grid(column=2, row=1, sticky=(W, E))
 
         self.username = StringVar()
@@ -54,18 +87,18 @@ class imap_auto():
         self.search_term_entry = ttk.Entry(self.root, width=25, textvariable=self.search_term)
         self.search_term_entry.grid(column=2, row=4, pady=20, sticky=(W, E))
 
-        self.download_folder_term = StringVar()
-        self.download_folder_entry = ttk.Entry(self.root, width=25, textvariable=self.download_folder_term)
-        self.download_folder_entry.grid(column=2, row=5, pady=20, sticky=(W, E))
-
         self.mail_folder_term = StringVar()
         self.mail_folder_entry = ttk.Entry(self.root, width=25, textvariable=self.mail_folder_term)
-        self.mail_folder_entry.grid(column=2, row=6, pady=20, sticky=(W, E))
-        
+        self.mail_folder_entry.grid(column=2, row=5, pady=20, sticky=(W, E))
+
         self.ext_term = StringVar()
         self.ext_entry = ttk.Entry(self.root, width=25, textvariable=self.ext_term)
-        self.ext_entry.grid(column=2, row=7, pady=20, sticky=(W, E))
-        
+        self.ext_entry.grid(column=2, row=6, pady=20, sticky=(W, E))
+
+        self.download_folder_term = StringVar()
+        self.download_folder_entry = ttk.Entry(self.root, width=25, textvariable=self.download_folder_term)
+        self.download_folder_entry.grid(column=2, row=7, pady=20, sticky=(W, E))
+                
         self.delete_term = IntVar()
         self.delete_check = ttk.Checkbutton(self.root, text='Delete emails', variable=self.delete_term)
         self.delete_check.grid(column=2, row=8, pady=20, sticky=(W, E))
@@ -73,20 +106,30 @@ class imap_auto():
         self.store_password = IntVar()
         self.password_check = ttk.Checkbutton(self.root, text='Store password?', variable=self.store_password)
         self.password_check.grid(column=3, row=12, pady=20, sticky=(W, E))
-        
-        if self.imap:
-            
-            self.console = ttk.Text(root, height=50, width=100)
-            self.console.grid(column=[2, 3], row=11)
-            
-            try:
-                for m in self.imap.mailboxes:
-                    self.console.insert(END, f"{m}\n")
 
-            except:
-                import traceback
-                print(traceback.format_exc())
-                pass
+        self.mailboxes = StringVar()
+
+        sys.stdout = self.StdoutRedirector(self.mailboxes)
+        
+        # try:
+        #     # self.imap
+            
+        #     # self.console = ttk.Label(self.root, height=50, width=100)
+        #     # self.console.grid(column=[2, 3], row=11)
+            
+        #     print("trying to write mailboxes...")
+        #     _mailboxes = "\n".join(self.imap.mailboxes)
+        #     self.mailboxes.set(_mailboxes)
+
+        #         # for m in self.imap.mailboxes:
+        #         #     self.console.(END, f"{m}\n")
+
+        # except:
+        #     import traceback
+        #     print(traceback.format_exc())
+        #     pass
+
+        #     self.mailboxes.set("mailboxes...")
             
 
         ttk.Button(self.root, text="Connect", command=lambda: self.connect()).grid(column=1, row=9, sticky=W)
@@ -99,13 +142,11 @@ class imap_auto():
         ttk.Label(self.root, text="username").grid(column=1, row=2, sticky=W)
         ttk.Label(self.root, text="password").grid(column=1, row=3, sticky=W)
         ttk.Label(self.root, text="search text").grid(column=1, row=4, sticky=W)
-        ttk.Label(self.root, text="download folder").grid(column=1, row=5, sticky=W)
-        ttk.Label(self.root, text="mail folder").grid(column=1, row=6, sticky=W)
-        ttk.Label(self.root, text="file extension").grid(column=1, row=7, sticky=W)
-
-        # status
-        self.status = ttk.Label(self.root, text='').grid(column=4, row=1)
-
+        ttk.Label(self.root, text="mail folder").grid(column=1, row=5, sticky=W)
+        ttk.Label(self.root, text="file extension").grid(column=1, row=6, sticky=W)
+        ttk.Label(self.root, text="download folder").grid(column=1, row=7, sticky=W)
+        self.status = ttk.Label(self.root, textvariable=self.mailboxes)
+        self.status.grid(column=1, columnspan=3, row=13, sticky=W)
 
         for child in self.root.winfo_children(): 
             child.grid_configure(padx=5, pady=5)
@@ -115,30 +156,105 @@ class imap_auto():
 
     def connect(self):
 
-        self.imap = mailer(server=self.server_entry.get(), username=self.username_entry.get(), password=self.password_entry.get(), gui=True)
-        self.imap.connect()
-        self.imap.list_mailboxes()
-        print(self.imap.mailboxes)
-        self.status.text = self.imap.mailboxes
+        try:
+            self.imap = mailer(server=self.server_entry.get(), username=self.username_entry.get(), password=self.password_entry.get(), gui=True)
+            self.imap.connect()
+            self.imap.list_mailboxes()
+            logger.info("mailboxes: {}".format("\n".join(self.imap.mailboxes)))
+            print(self.imap.mailboxes)
+            logger.info(f"connected to {self.server_entry.get()}")
 
+        except Exception as e:
+            logger.error("login failed")
+            logger.debug(e)
         
     def disconnect(self):
         self.imap.disconnect()
-        
+        logger.info(f"disconnected from {self.server_entry.get()}")
+       
     def download_attachments(self):
-        
+
         if self.delete_check.instate(['selected']):
+            logger.debug("delete email option selected")
             delete = True
         else:
             delete = False
         
+        logger.info(f"searching for messages in {self.mail_folder_entry.get()}")
         self.imap.search_for_messages(text= self.search_term_entry.get(), area='body', folder=self.mail_folder_entry.get())
+        logger.info(f"found {len(self.imap.results)} messages")
+        print(self.imap.results)
+        
+        logger.info(f"downloading attachments from {self.server_entry.get()}")
+
         self.imap.download_attachments(
             out_dir=self.download_folder_entry.get(), 
             extension=self.ext_entry.get(), 
             delete=delete, 
     #         archive_folder='INBOX/Archive'
         )
+        # sys.stdout = sys.__stdout__
+
+    # def download_file(self):
+        
+    #     for i, result in enumerate(self.imap.results):
+        
+    #         message_folder = self.results[i][0]
+    #         msgs = self.results[i][1]
+            
+    #         for emailid in msgs:
+
+    #             resp, data = self.imap4.fetch(emailid, "(RFC822)")
+    #             email_body = data[0][1]
+                
+    #             m = email.message_from_bytes(email_body)
+
+    #             if m.get_content_maintype() != 'multipart':
+    #                 continue
+
+    #             for part in m.walk():
+    #                 if part.get_content_maintype() == 'multipart':
+    #                     continue
+    #                 if part.get('Content-Disposition') is None:
+    #                     continue
+
+    #                 filename = part.get_filename()
+
+    #                 if self.echo: sys.stdout.write('\r')
+    #                 if self.echo: sys.stdout.write(f'{cnt} ... checking attachment ... {filename}                               ')
+
+    #                 if (filename is not None) and (filename.lower().endswith(extension)):
+    #                     cnt += 1
+    #                     process = True
+
+    #                     if self.echo: sys.stdout.write('\r')
+    #                     if self.echo: sys.stdout.write(f'{cnt} ... downloading ... {filename}                               ')
+
+    #                     save_path = os.path.join(out_dir, filename)
+                                            
+    #                     if not os.path.isfile(save_path):
+    #                         fp = open(save_path, 'wb')
+    #                         fp.write(part.get_payload(decode=True))
+    #                         fp.close()
+
+    #                     if self.echo: sys.stdout.write('\r')
+    #                     if self.echo: sys.stdout.write(f'{cnt} ... downloading ... {filename}                     [OK]      ')
+
+    #                 else:
+    #                     process = False
+
+    #             if process:
+                    
+    #                 if archive_folder: self.imap4.copy(emailid, archive_folder)
+                    
+    #                 if delete: self.imap4.store(emailid, 'FLAGS', '\\Deleted')
+        
+    #     if self.echo: sys.stdout.write('\r')
+    #     if self.echo: sys.stdout.write(f'downloaded {cnt} attachments to {out_dir}                                ')
+        
+    #     self.imap4.expunge()
+            
+
 
     def load_settings(self):
         """Open a file for editing."""
@@ -146,9 +262,7 @@ class imap_auto():
         try:
             with open(config_file, 'rb') as f:
                 file_dict = pickle.load(f)
-            
-            print(file_dict)
-            
+                        
             self.server_entry.delete(0, END)
             self.username_entry.delete(0, END)
             self.password_entry.delete(0, END)
@@ -169,6 +283,8 @@ class imap_auto():
                 self.delete_check.state(['selected'])
             else:
                 self.delete_check.state(['!selected'])
+
+            logger.info(f"loaded settings from {config_file}")
 
         except:
             import traceback
@@ -197,6 +313,8 @@ class imap_auto():
         with open(config_file, 'wb') as f:
             pickle.dump(file_dict, f)
 
-            
+        logger.info(f"saved settings to {config_file}")
+
+
 if __name__ == "__main__":
     app = imap_auto()

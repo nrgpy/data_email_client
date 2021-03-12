@@ -11,6 +11,9 @@ setup(
       long_description_content_type='text/markdown',
       url='https://github.com/nrgpy/data_email_client',
       packages=['data_email_client'],
+      install_requires=[
+            'tkinter',
+      ],
       author='NRG Systems, Inc.',
       author_email='support@nrgsystems.com',
       keywords='nrg systems rld symphonie symphoniepro wind data spidar remote sensor lidar email imap attachment download',

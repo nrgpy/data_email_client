@@ -1,4 +1,6 @@
+*.conf
 *.ipynb
+*.log
 *.txt
 .ipynb_checkpoints/
 
