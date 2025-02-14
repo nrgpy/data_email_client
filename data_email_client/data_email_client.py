@@ -1,13 +1,15 @@
 import email
+import getpass
 import imaplib
 import os
 import sys
 
-class mailer(object):
-    """ imap client for mail servers
-    
+
+class Mailer:
+    """imap client for mail servers
+
     optionally create a danger.py file containing definitions for username and password
-    
+
     Parameters
     ----------
     server : str
@@ -15,12 +17,12 @@ class mailer(object):
     username : str
         email address of client
     password : str
-    
+
     Returns
     -------
     obj
         object for handling emails
-    
+
     Examples
     --------
     connect to email account
@@ -30,55 +32,60 @@ class mailer(object):
     >>> imap = mailer(server=server, username=username, password=password)
 
     """
-    
-    def __init__(self, server='', username='', password='', gui=False):
+
+    def __init__(
+        self,
+        server: str = "",
+        username: str = "",
+        password: str = "",
+        gui: bool = False,
+    ):
         self.server = server
         self.username = username
         self.password = password
         self.gui = gui
-    
-        if self.username == '' and self.password == '' and not self.gui:
+
+        if not self.username and not self.password and not self.gui:
 
             try:
                 from danger import username, password
+
                 self.username = username
                 self.password = password
-            except:
+            except ImportError:
                 self.username = getpass.getuser()
                 self.password = getpass.getpass()
-                    
+
             self.connect()
             self.list_mailboxes()
-        
-                
-    def connect(self):
+
+    def connect(self) -> None:
         self.imap4 = imaplib.IMAP4_SSL(self.server)
         self.imap4.login(self.username, self.password)
         self.imap4.select()
-        
-        
-    def disconnect(self):
+
+    def disconnect(self) -> None:
         self.imap4.logout()
-    
-    
-    def list_mailboxes(self):
-        """ return a list of all mailboxes in the account
-        
+
+    def list_mailboxes(self) -> None:
+        """return a list of all mailboxes in the account
+
         new object is self.mailboxes
         """
         self.result, self.b_mailboxes = self.imap4.list()
         self.mailboxes = []
-        
+
         for f in self.b_mailboxes:
             try:
                 self.mailboxes.append(f.decode().split(' "/" ')[1])
-            except:
+            except Exception:
                 pass
-        
-        
-    def search_for_messages(self, text="", area='', folder='', echo=True):
-        """ find messages that match text
-        
+
+    def search_for_messages(
+        self, text: str = "", area: str = "", folder: str = "", echo: bool = True
+    ) -> None:
+        """find messages that match text
+
         Parameters
         ----------
         text : str
@@ -89,12 +96,12 @@ class mailer(object):
             folder to search. if not given, searches the whole inbox.
         echo : bool
             (True) show results as searching through folders
-        
+
         Returns
         -------
         None
             this creates and populates the self.results list of [folder, [messages-as-list]]
-            
+
         Examples
         --------
         >>> username = 'me@mymail.mo'
@@ -104,40 +111,46 @@ class mailer(object):
         >>> imap.list_mailboxes()
         >>> imap.search_for_messages(text='data', area='SUBJECT', folder=imap.mailboxes[0])
         """
-        
+
         self.echo = echo
         self.results = []
-        
+
         search_term = f'({area} "{text}")'
-        
-        if folder:
-            if isinstance(folder, str): folder = [folder]
+
+        if folder and isinstance(folder, str):
+            folder = [folder]
         else:
             self.list_mailboxes()
             folder = self.mailboxes
-        
-        if echo: print(f"Searching {len(folder)} folders for {text}\n")
-        
+
+        if echo:
+            print(f"Searching {len(folder)} folders for {text}\n")
+
         for i, f in enumerate(folder):
-            if echo: sys.stdout.write("\r")
-            if echo: sys.stdout.write(f"{i+1} SEARCHING ... {f}                                   ")
-            
+            if echo:
+                sys.stdout.write("\r")
+            if echo:
+                sys.stdout.write(
+                    f"{i+1} SEARCHING ... {f}                                   "
+                )
+
             self.imap4.select(f)
-            
             typ, msg = self.imap4.search(None, search_term)
-            
             if msg[0]:
                 self.results.append([f, msg[0].split()])
-
-                
             sys.stdout.flush()
-            
-            
-    def download_attachments(self, extension=('rld','rwd'), out_dir='', delete=False, archive_folder=''):
-        """ download email attachments to folder and optionally archive/delete emails
+
+    def download_attachments(
+        self,
+        extension: tuple[str, str] = ("rld", "rwd"),
+        out_dir: str = "",
+        delete: bool = False,
+        archive_folder: str = "",
+    ) -> None:
+        """download email attachments to folder and optionally archive/delete emails
 
         requires that the search_for_messages function be called first, and uses the self.results message list as a queue.
-        
+
         Parameters
         ----------
         extension : str
@@ -149,78 +162,92 @@ class mailer(object):
             (False) delete messages
         archive_folder : str
             (optional) folder to move files to (must be existing)
-            
+
         Examples
         --------
         >>> imap.download_attachments(out_dir='data_files/', delete=True, archive_folder=imap.mailboxes[13])
-        
+
         """
-        
+
         cnt = 0
 
-        if out_dir: self.affirm_directory(out_dir)
-        
+        if out_dir:
+            os.makedirs(out_dir, exist_ok=True)
+
         for i, result in enumerate(self.results):
-            
+
             message_folder = self.results[i][0]
             msgs = self.results[i][1]
-            
+
             for emailid in msgs:
 
                 resp, data = self.imap4.fetch(emailid, "(RFC822)")
                 email_body = data[0][1]
-                
+
                 m = email.message_from_bytes(email_body)
 
-                if m.get_content_maintype() != 'multipart':
+                if m.get_content_maintype() != "multipart":
                     continue
 
                 for part in m.walk():
-                    if part.get_content_maintype() == 'multipart':
+                    if part.get_content_maintype() == "multipart":
                         continue
-                    if part.get('Content-Disposition') is None:
+                    if part.get("Content-Disposition") is None:
                         continue
 
                     filename = part.get_filename()
 
-                    if self.echo: sys.stdout.write('\r')
-                    if self.echo: sys.stdout.write(f'{cnt} ... checking attachment ... {filename}                               ')
+                    if self.echo:
+                        sys.stdout.write("\r")
+                    if self.echo:
+                        sys.stdout.write(
+                            f"{cnt} ... checking attachment ... {filename}                               "
+                        )
 
-                    if (filename is not None) and (filename.lower().endswith(extension)):
+                    if (filename is not None) and (
+                        filename.lower().endswith(extension)
+                    ):
                         cnt += 1
                         process = True
 
-                        if self.echo: sys.stdout.write('\r')
-                        if self.echo: sys.stdout.write(f'{cnt} ... downloading ... {filename}                               ')
+                        if self.echo:
+                            sys.stdout.write("\r")
+                        if self.echo:
+                            sys.stdout.write(
+                                f"{cnt} ... downloading ... {filename}                               "
+                            )
 
                         save_path = os.path.join(out_dir, filename)
-                                            
+
                         if not os.path.isfile(save_path):
-                            fp = open(save_path, 'wb')
+                            fp = open(save_path, "wb")
                             fp.write(part.get_payload(decode=True))
                             fp.close()
 
-                        if self.echo: sys.stdout.write('\r')
-                        if self.echo: sys.stdout.write(f'{cnt} ... downloading ... {filename}                     [OK]      ')
+                        if self.echo:
+                            sys.stdout.write("\r")
+                        if self.echo:
+                            sys.stdout.write(
+                                f"{cnt} ... downloading ... {filename}                     [OK]      "
+                            )
 
                     else:
                         process = False
 
                 if process:
-                    
-                    if archive_folder: self.imap4.copy(emailid, archive_folder)
-                    
-                    if delete: self.imap4.store(emailid, 'FLAGS', '\\Deleted')
-        
-        if self.echo: sys.stdout.write('\r')
-        if self.echo: sys.stdout.write(f'downloaded {cnt} attachments to {out_dir}                                ')
-        
+
+                    if archive_folder:
+                        self.imap4.copy(emailid, archive_folder)
+
+                    if delete:
+                        self.imap4.store(emailid, "FLAGS", "\\Deleted")
+
+        if self.echo:
+            sys.stdout.write("\r")
+        if self.echo:
+            sys.stdout.write(
+                f"downloaded {cnt} attachments to {out_dir}                                "
+            )
+
         self.imap4.expunge()
-            
-            
-    def affirm_directory(self, directory):
-        """ ensure a directory exists """
-        try:
-            os.mkdir(directory)
-        except:
-            pass
+

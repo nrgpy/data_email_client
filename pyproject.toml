@@ -1,0 +1,40 @@
+[build-system]
+build-backend = "setuptools.build_meta"
+requires = ["setuptools", "wheel"]
+
+[project]
+name = "data_email_client"
+version = "0.4.0"
+description = "A simple python email client for downloading email attachments"
+authors = [{name = "David Carlson", email = "drc@nrgsystems.com"}]
+readme = "README.md"
+keywords = ["email", "attachments", "client", "download", "nrg systems", "data"]
+requires-python = ">=3.6"
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+]
+
+[tool.setuptools.packages.find]
+include = ["data_email_client", "data_email_client.*"]
+exclude = ["tests", "venv", "dist", "build", "data_email_client.egg-info"]
+
+[project.urls]
+Repository = "https://github.com/nrgpy/data_email_client"
+
+[project.optional-dependencies]
+dev = [
+    "black",       # for code formatting
+    "rich",        # for better console output
+    "jupyterhub",  # for jupyter notebooks
+]
+
+gui = [
+    "tkinter",     # for GUI
+]
+
+[tool.mypy]
+ignore_missing_imports = true
+exclude = ["tests", "venv", "dist", "build", "data_email_client.egg-info"]

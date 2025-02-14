@@ -1,6 +1,9 @@
+*.bak
 *.conf
 *.ipynb
 *.log
+*.swp
+*.swo
 *.txt
 .ipynb_checkpoints/
 
