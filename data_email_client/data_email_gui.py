@@ -1,12 +1,11 @@
-from data_email_client import mailer
-from data_email_client.log import log
+from data_email_client.email_client import Mailer
+from data_email_client.common.log import log
 import pickle
 import sys
 
 
 try:
-    from tkinter import *
-    from tkinter import ttk
+    from tkinter import ttk, Tk, StringVar, IntVar, END, W, E
     from tkinter.filedialog import askopenfilename, asksaveasfilename
 
 except ModuleNotFoundError as e:
@@ -41,7 +40,7 @@ class ImapAuto:
         def flush(self) -> None:
             pass
 
-    def __init__(self, first: bool=True, *args, **kwargs):
+    def __init__(self, first: bool = True, *args, **kwargs):
 
         self.root = Tk()
         self.root.title(title)
@@ -104,26 +103,6 @@ class ImapAuto:
 
         sys.stdout = self.StdoutRedirector(self.mailboxes)
 
-        # try:
-        #     # self.imap
-
-        #     # self.console = ttk.Label(self.root, height=50, width=100)
-        #     # self.console.grid(column=[2, 3], row=11)
-
-        #     print("trying to write mailboxes...")
-        #     _mailboxes = "\n".join(self.imap.mailboxes)
-        #     self.mailboxes.set(_mailboxes)
-
-        #         # for m in self.imap.mailboxes:
-        #         #     self.console.(END, f"{m}\n")
-
-        # except:
-        #     import traceback
-        #     print(traceback.format_exc())
-        #     pass
-
-        #     self.mailboxes.set("mailboxes...")
-
         ttk.Button(self.root, text="Connect", command=lambda: self.connect()).grid(
             column=1, row=9, sticky=W
         )
@@ -157,11 +136,13 @@ class ImapAuto:
 
         self.server_entry.focus()
         self.root.mainloop()
+        if os.path.exists(config_file):
+            self.load_settings()
 
     def connect(self) -> None:
 
         try:
-            self.imap = mailer(
+            self.imap = Mailer(
                 server=self.server_entry.get(),
                 username=self.username_entry.get(),
                 password=self.password_entry.get(),
@@ -204,68 +185,7 @@ class ImapAuto:
             out_dir=self.download_folder_entry.get(),
             extension=self.ext_entry.get(),
             delete=delete,
-            #         archive_folder='INBOX/Archive'
         )
-        # sys.stdout = sys.__stdout__
-
-    # def download_file(self):
-
-    #     for i, result in enumerate(self.imap.results):
-
-    #         message_folder = self.results[i][0]
-    #         msgs = self.results[i][1]
-
-    #         for emailid in msgs:
-
-    #             resp, data = self.imap4.fetch(emailid, "(RFC822)")
-    #             email_body = data[0][1]
-
-    #             m = email.message_from_bytes(email_body)
-
-    #             if m.get_content_maintype() != 'multipart':
-    #                 continue
-
-    #             for part in m.walk():
-    #                 if part.get_content_maintype() == 'multipart':
-    #                     continue
-    #                 if part.get('Content-Disposition') is None:
-    #                     continue
-
-    #                 filename = part.get_filename()
-
-    #                 if self.echo: sys.stdout.write('\r')
-    #                 if self.echo: sys.stdout.write(f'{cnt} ... checking attachment ... {filename}                               ')
-
-    #                 if (filename is not None) and (filename.lower().endswith(extension)):
-    #                     cnt += 1
-    #                     process = True
-
-    #                     if self.echo: sys.stdout.write('\r')
-    #                     if self.echo: sys.stdout.write(f'{cnt} ... downloading ... {filename}                               ')
-
-    #                     save_path = os.path.join(out_dir, filename)
-
-    #                     if not os.path.isfile(save_path):
-    #                         fp = open(save_path, 'wb')
-    #                         fp.write(part.get_payload(decode=True))
-    #                         fp.close()
-
-    #                     if self.echo: sys.stdout.write('\r')
-    #                     if self.echo: sys.stdout.write(f'{cnt} ... downloading ... {filename}                     [OK]      ')
-
-    #                 else:
-    #                     process = False
-
-    #             if process:
-
-    #                 if archive_folder: self.imap4.copy(emailid, archive_folder)
-
-    #                 if delete: self.imap4.store(emailid, 'FLAGS', '\\Deleted')
-
-    #     if self.echo: sys.stdout.write('\r')
-    #     if self.echo: sys.stdout.write(f'downloaded {cnt} attachments to {out_dir}                                ')
-
-    #     self.imap4.expunge()
 
     def load_settings(self) -> None:
         """Open a file for editing."""

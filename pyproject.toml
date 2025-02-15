@@ -29,10 +29,7 @@ dev = [
     "black",       # for code formatting
     "rich",        # for better console output
     "jupyterhub",  # for jupyter notebooks
-]
-
-gui = [
-    "tkinter",     # for GUI
+    "pyinstaller", # for creating executables
 ]
 
 [tool.mypy]

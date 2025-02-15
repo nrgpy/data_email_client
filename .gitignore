@@ -6,6 +6,7 @@
 *.swo
 *.txt
 .ipynb_checkpoints/
+credentials.py
 
 .vscode/
 *__pycache__/
