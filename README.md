@@ -10,6 +10,38 @@
 
 _see script docstrings for more usage info._
 
+### set up virtual environment
+
+This step isn't necessary, but is best practice. If you don't have your own preferences
+around this, follow these steps:
+
+```bash
+# clone the repository
+git clone https://github.com/nrgpy/data_email_client
+cd data_email_client
+
+# create the virtual environment
+python -m venv venv      # use python3 for linux/ios
+.\venv\Scripts\activate  # source venv/bin/activate for linux/ios
+
+# install this package
+pip install -e .[dev,test]
+```
+
+### open the gui
+
+To run this application as a desktop application:
+
+```bash
+cd /path/to/data_email_client
+python data_email_client/data_email_gui.py
+```
+
+This application will allow you to store settings that will recall automatically when the
+gui application starts.
+
+![data_email_client](./data_email_client/static/data_email_client_gui_example.png)
+
 ### symphonie data emails
 
 ``` python

@@ -45,7 +45,7 @@ class ImapAuto:
         self.root.columnconfigure(1, minsize=100, pad=10, weight=1)
         self.root.rowconfigure(0, weight=1)
 
-        self.icon = PhotoImage(file="data_email_client/nrg.png")
+        self.icon = PhotoImage(file="data_email_client/static/nrg.png")
         self.root.iconphoto(False, self.icon)
 
         self.server_var = StringVar()
