@@ -16,6 +16,10 @@ classifiers = [
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
 ]
+dependencies = [
+    "cryptography",  # for encrypting/decrypting email credentials
+    "pydantic",      # for data validation
+]
 
 [tool.setuptools.packages.find]
 include = ["data_email_client", "data_email_client.*"]
@@ -28,7 +32,7 @@ Repository = "https://github.com/nrgpy/data_email_client"
 dev = [
     "black",       # for code formatting
     "rich",        # for better console output
-    "jupyterhub",  # for jupyter notebooks
+    "jupyterlab",  # for jupyter notebooks
     "pyinstaller", # for creating executables
 ]
 
