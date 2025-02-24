@@ -2,6 +2,7 @@
 *.conf
 *.ipynb
 *.log
+*.spec
 *.swp
 *.swo
 *.txt

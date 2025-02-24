@@ -19,12 +19,14 @@ class Mailer:
     username : str
         email address of client
     password : str
+    port : int
+        (993) port to connect to imap server
 
     Examples
     --------
     connect to email account
-    >>> server = 'outlook.office365.com' # for gmail use 'imap.gmail.com'
-    >>> username = 'the-big-data-catcher@mycompany.com'
+    >>> server = 'imap.myemail.com'
+    >>> username = 'the-big-data-catcher@myemail.com'
     >>> password = '1234567890'
     >>> imap = Mailer(server=server, username=username, password=password)
     >>> imap.connect()
@@ -40,11 +42,13 @@ class Mailer:
         username: str = "",
         password: str = "",
         gui: bool = False,
+        port: int = 993,
     ):
         self.server = server
         self.username = username
         self.password = password
         self.gui = gui
+        self.port = port
 
         if not self.username and not self.password and not self.server and not self.gui:
 
@@ -61,10 +65,24 @@ class Mailer:
             self.connect()
             self.list_mailboxes()
 
-    def connect(self) -> None:
-        self.imap4 = imaplib.IMAP4_SSL(self.server)
-        self.imap4.login(self.username, self.password)
-        self.imap4.select()
+    def connect(self, timeout_seconds: int = 10) -> None:
+        try:
+            self.imap4 = imaplib.IMAP4_SSL(
+                host=self.server,
+                port=self.port,
+                timeout=timeout_seconds,
+            )
+            self.imap4.login(self.username, self.password)
+            self.imap4.select()
+        except TimeoutError:
+            log.error(
+                f"connection to {self.server} timed out after {timeout_seconds} seconds"
+            )
+        except Exception as e:
+            if "authenticationfailed" in str(e).lower():
+                log.error(f"authentication failed for {self.username}")
+            else:
+                log.exception(f"connection failed to {self.server}")
 
     def disconnect(self) -> None:
         self.imap4.logout()
